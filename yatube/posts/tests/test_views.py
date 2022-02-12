@@ -42,16 +42,15 @@ class PostVIEWTests(TestCase):
     def test_uses_correct_template(self):
         views_template = {
             reverse('posts:index'): 'posts/index.html',
-            reverse('posts:group_list', 
-                    kwargs={'slug': f'{PostVIEWTests.post.group.slug}'}):
-                    'posts/group_list.html',
+            reverse('posts:group_list', kwargs={'slug':
+                    f'{self.post.group.slug}'}):'posts/group_list.html',
             reverse('posts:profile', kwargs={'username':
-                    f'{PostVIEWTests.user}'}): 'posts/profile.html',
+                    f'{self.user}'}): 'posts/profile.html',
             reverse('posts:post_detail', kwargs={'post_id':
-                    f'{PostVIEWTests.post.id}'}): 'posts/post_detail.html',
+                    f'{self.post.id}'}): 'posts/post_detail.html',
             reverse('posts:post_create'): 'posts/create_post.html',
             reverse('posts:post_edit', kwargs={'post_id':
-                    f'{PostVIEWTests.post.id}'}): 'posts/create_post.html'
+                    f'{self.post.id}'}): 'posts/create_post.html'
         }
         for address, template in views_template.items():
             with self.subTest(template=template):
