@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
-from django.urls import reverse
 
 from ..models import Group, Post
 
@@ -59,7 +58,7 @@ class PostURLTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_profile_url_exist_any_user(self):
-        """Страница /profile/<username> ПРОФИЛЬ доступна 
+        """Страница /profile/<username> ПРОФИЛЬ доступна
         любому пользователю."""
         response = self.guest_client.get(f'/profile/{PostURLTests.user}/')
         self.assertEqual(response.status_code, 200)
@@ -71,17 +70,17 @@ class PostURLTests(TestCase):
 
     def test_url_unexist_any_user(self):
         """Страница 404 для любого пользователя."""
-        response = self.guest_client.get(f'/notexist/')
+        response = self.guest_client.get('/notexist/')
         self.assertEqual(response.status_code, 404)
 
     def test_create_post_url_exist_auth_user(self):
         """Страница /create/<post_id> СОЗДАТЬ ПОСТ 
         доступна авториз.пользователю."""
-        response = self.authorized_client.get(f'/create/')
+        response = self.authorized_client.get('/create/')
         self.assertEqual(response.status_code, 200)
 
     def test_post_edit_url_exist_auth_user(self):
-        """Страница /posts/<post_id>/edit/ РЕД.ПОСТ доступна 
+        """Страница /posts/<post_id>/edit/ РЕД.ПОСТ доступна
         авториз.пользователю."""
         response = self.authorized_client.get(
             f'/posts/{PostURLTests.post.id}/edit/')

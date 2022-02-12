@@ -20,13 +20,13 @@ class PostVIEWTests(TestCase):
         for i in range(POSTS_NUMBER):
             cls.slug = f'test_group_{i}'
             cls.group = Group.objects.create(
-                title=f'Тестовая группа',
+                title='Тестовая группа',
                 slug=f'test_group_{i}',
-                description=f'Тестовое описание'
+                description='Тестовое описание'
             )
             cls.post = Post.objects.create(
                 author=cls.user,
-                text=f'Тестовая запись',
+                text='Тестовая запись',
                 group=cls.group,
             )
 
@@ -42,15 +42,15 @@ class PostVIEWTests(TestCase):
     def test_uses_correct_template(self):
         views_template = {
             reverse('posts:index'): 'posts/index.html',
-            reverse('posts:group_list', kwargs={'slug': 
-                    f'{PostVIEWTests.post.group.slug}'}): 
-                       'posts/group_list.html',
-            reverse('posts:profile', kwargs={'username': 
+            reverse('posts:group_list', kwargs={'slug':
+                    f'{PostVIEWTests.post.group.slug}'}):
+                    'posts/group_list.html',
+            reverse('posts:profile', kwargs={'username':
                     f'{PostVIEWTests.user}'}): 'posts/profile.html',
-            reverse('posts:post_detail', kwargs={'post_id': 
+            reverse('posts:post_detail', kwargs={'post_id':
                     f'{PostVIEWTests.post.id}'}): 'posts/post_detail.html',
             reverse('posts:post_create'): 'posts/create_post.html',
-            reverse('posts:post_edit', kwargs={'post_id': 
+            reverse('posts:post_edit', kwargs={'post_id':
                     f'{PostVIEWTests.post.id}'}): 'posts/create_post.html'
         }
         for address, template in views_template.items():
@@ -60,7 +60,7 @@ class PostVIEWTests(TestCase):
 
     def test_context_post_detail(self):
         response = self.authorized_client.get(
-            reverse('posts:post_detail', kwargs={'post_id': 
+            reverse('posts:post_detail', kwargs={'post_id':
                     f'{PostVIEWTests.post.id}'}))
         post = response.context.get('post')
         context_fields = {
@@ -167,7 +167,7 @@ class PostVIEWTests(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
-        post = Post.objects.all().first() 
+        post = Post.objects.all().first()
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group.id, form_data['group'])
@@ -178,7 +178,7 @@ class PostVIEWTests(TestCase):
 
     def test_context_post_edit(self):
         response = self.authorized_client.get(
-            reverse('posts:post_edit', kwargs={'post_id': 
+            reverse('posts:post_edit', kwargs={'post_id':
                     f'{PostVIEWTests.post.id}'}))
         form_fields = {
             'group': forms.models.ModelChoiceField,
@@ -188,5 +188,3 @@ class PostVIEWTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
-
-
