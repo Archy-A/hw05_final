@@ -74,7 +74,7 @@ class PostURLTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_create_post_url_exist_auth_user(self):
-        """Страница /create/<post_id> СОЗДАТЬ ПОСТ 
+        """Страница /create/<post_id> СОЗДАТЬ ПОСТ
         доступна авториз.пользователю."""
         response = self.authorized_client.get('/create/')
         self.assertEqual(response.status_code, 200)
@@ -88,13 +88,14 @@ class PostURLTests(TestCase):
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
+        dic_create = 'create_post.html'
         templates_url_names = {
             'posts/index.html': '/',
             'posts/group_list.html': '/group/test_group/',
             'posts/profile.html': '/profile/auth/',
             'posts/post_detail.html': f'/posts/{PostURLTests.post.id}/',
             'posts/create_post.html': '/create/',
-            'posts/create_post.html': f'/posts/{PostURLTests.post.id}/edit/',
+            f'posts/{dic_create}': f'/posts/{PostURLTests.post.id}/edit/',
         }
         for template, address in templates_url_names.items():
             with self.subTest(address=address):
