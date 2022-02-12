@@ -42,9 +42,9 @@ class PostVIEWTests(TestCase):
     def test_uses_correct_template(self):
         views_template = {
             reverse('posts:index'): 'posts/index.html',
-            reverse('posts:group_list', kwargs={'slug':
-                    f'{PostVIEWTests.post.group.slug}'}):
-                     'posts/group_list.html',
+            reverse('posts:group_list', 
+                    kwargs={'slug': f'{PostVIEWTests.post.group.slug}'}):
+                    'posts/group_list.html',
             reverse('posts:profile', kwargs={'username':
                     f'{PostVIEWTests.user}'}): 'posts/profile.html',
             reverse('posts:post_detail', kwargs={'post_id':
