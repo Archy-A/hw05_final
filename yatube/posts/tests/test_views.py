@@ -29,15 +29,11 @@ class PostVIEWTests(TestCase):
             slug='test_group_29',
             description='Тестовое описание')
 
-        post = (Post(author=cls.user, text='Тестовая запись %s' % i, group=cls.group) for i in range(POSTS_NUMBER))
-        Post.objects.bulk_create(post)
-     
-        # for i in range(POSTS_NUMBER):
-        #     cls.post = Post.objects.create(
-        #         author=cls.user,
-        #         text='Тестовая запись',
-        #         group=cls.group,
-        #     )
+        cls.post = Post.objects.create(
+            author=cls.user,
+            text='Тестовая запись',
+            group=cls.group,
+            )
 
     def setUp(self) -> None:
         self.guest_client = Client()
@@ -49,7 +45,7 @@ class PostVIEWTests(TestCase):
         self.authorized_client_not_author.force_login(self.not_author)
 
     def test_uses_correct_template(self):
-        post = Post.objects.get(id=29)
+        post = Post.objects.get(id=1)
         views_template = {
             reverse('posts:index'): 'posts/index.html',
             reverse('posts:group_list', kwargs={'slug':
@@ -67,122 +63,145 @@ class PostVIEWTests(TestCase):
                 response = self.authorized_client.get(address)
                 self.assertTemplateUsed(response, template)
 
-    # def test_context_post_detail(self):
-    #     response = self.authorized_client.get(
-    #         reverse('posts:post_detail', kwargs={'post_id':
-    #                 f'{self.post.id}'}))
-    #     post = response.context.get('post')
-    #     context_fields = {
-    #         post.text: f'{self.post.text}',
-    #         post.author.username: f'{self.user.username}',
-    #         post.group.title: f'{self.group.title}',
-    #         post.group.description: f'{self.group.description}',
-    #         post.group.slug: f'{self.group.slug}'
-    #     }
-    #     for value, expected in context_fields.items():
-    #         with self.subTest(value=value):
-    #             self.assertEqual(value, expected)
+    def test_context_post_detail(self):
+        response = self.authorized_client.get(
+            reverse('posts:post_detail', kwargs={'post_id':
+                    f'{self.post.id}'}))
+        post = response.context.get('post')
+        context_fields = {
+            post.text: f'{self.post.text}',
+            post.author.username: f'{self.user.username}',
+            post.group.title: f'{self.group.title}',
+            post.group.description: f'{self.group.description}',
+            post.group.slug: f'{self.group.slug}'
+        }
+        for value, expected in context_fields.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
 
-    # def test_context_index(self):
-    #     response = self.authorized_client.get(reverse('posts:index'))
-    #     self.assertEqual(len(response.context.get('page_obj').object_list), 10)
-    #     self.assertTrue(len(response.context.get('page_obj').object_list) > 0)
-    #     post = response.context['page_obj'][0]
-    #     context_fields = {
-    #         'id': post.id,
-    #         'text': post.text,
-    #         'pub_date': post.pub_date,
-    #         'author': post.author,
-    #     }
-    #     for value, expected in context_fields.items():
-    #         with self.subTest(value=value):
-    #             self.assertIsNotNone(expected)
+    def test_context_index(self):
+        response = self.authorized_client.get(reverse('posts:index'))
+        self.assertEqual(len(response.context.get('page_obj').object_list), 1)
+        self.assertTrue(len(response.context.get('page_obj').object_list) > 0)
+        post = response.context['page_obj'][0]
+        context_fields = {
+            'id': post.id,
+            'text': post.text,
+            'pub_date': post.pub_date,
+            'author': post.author,
+        }
+        for value, expected in context_fields.items():
+            with self.subTest(value=value):
+                self.assertIsNotNone(expected)
 
-    #     cont = response.context
-    #     context_fields = {
-    #         cont['page_obj'][0].text: 'Тестовая запись',
-    #     }
-    #     for value, expected in context_fields.items():
-    #         with self.subTest(value=value):
-    #             self.assertEqual(value, expected)
+        cont = response.context
+        context_fields = {
+            cont['page_obj'][0].text: 'Тестовая запись',
+        }
+        for value, expected in context_fields.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
 
-    # def test_context_grouplist(self):
-    #     response = self.authorized_client.get(
-    #         reverse('posts:group_list', kwargs={'slug': 'test_group_29'}))
-    #     self.assertEqual(len(response.context.get('page_obj').object_list), 10)
-    #     groupcontext = response.context['page_obj'][0]
-    #     context_fields = {
-    #         'id': groupcontext.id,
-    #         'text': groupcontext.text,
-    #         'pub_date': groupcontext.pub_date,
-    #         'author': groupcontext.author,
-    #     }
-    #     for value, expected in context_fields.items():
-    #         with self.subTest(value=value):
-    #             self.assertIsNotNone(expected)
+    def test_context_grouplist(self):
+        response = self.authorized_client.get(
+            reverse('posts:group_list', kwargs={'slug': 'test_group_29'}))
+        groupcontext = response.context['page_obj'][0]
+        context_fields = {
+            'id': groupcontext.id,
+            'text': groupcontext.text,
+            'pub_date': groupcontext.pub_date,
+            'author': groupcontext.author,
+        }
+        for value, expected in context_fields.items():
+            with self.subTest(value=value):
+                self.assertIsNotNone(expected)
 
-    #     cont = response.context
-    #     context_fields = {
-    #         cont['group'].title: 'Тестовая группа',
-    #         cont['page_obj'][0].text: 'Тестовая запись',
-    #     }
-    #     for value, expected in context_fields.items():
-    #         with self.subTest(value=value):
-    #             self.assertEqual(value, expected)
+        cont = response.context
+        context_fields = {
+            cont['group'].title: 'Тестовая группа',
+            cont['page_obj'][0].text: 'Тестовая запись',
+        }
+        for value, expected in context_fields.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
 
-    # def test_context_profile(self):
-    #     response = self.authorized_client.get(
-    #         reverse('posts:profile', kwargs={'username': 'auth'}))
-    #     profilecontext = response.context['page_obj'][0]
-    #     context_fields = {
-    #         'id': profilecontext.id,
-    #         'text': profilecontext.text,
-    #         'pub_date': profilecontext.pub_date,
-    #         'author': profilecontext.author,
-    #     }
-    #     for value, expected in context_fields.items():
-    #         with self.subTest(value=value):
-    #             self.assertIsNotNone(expected)
+    def test_context_profile(self):
+        response = self.authorized_client.get(
+            reverse('posts:profile', kwargs={'username': 'auth'}))
+        profilecontext = response.context['page_obj'][0]
+        context_fields = {
+            'id': profilecontext.id,
+            'text': profilecontext.text,
+            'pub_date': profilecontext.pub_date,
+            'author': profilecontext.author,
+        }
+        for value, expected in context_fields.items():
+            with self.subTest(value=value):
+                self.assertIsNotNone(expected)
 
-    #     cont = response.context
-    #     context_fields = {
-    #         cont['user'].username: 'auth',
-    #         cont['page_obj'][0].text: 'Тестовая запись',
-    #         cont['post_count']: 30
-    #     }
-    #     for value, expected in context_fields.items():
-    #         with self.subTest(value=value):
-    #             self.assertEqual(value, expected)
+        cont = response.context
+        context_fields = {
+            cont['user'].username: 'auth',
+            cont['page_obj'][0].text: 'Тестовая запись',
+            cont['post_count']: 1
+        }
+        for value, expected in context_fields.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
 
-    # def test_context_post_create(self):
-    #     response = self.authorized_client.get(reverse('posts:post_create'))
-    #     form_fields = {
-    #         'group': forms.models.ModelChoiceField,
-    #         'text': forms.fields.CharField,
-    #     }
-    #     for value, expected in form_fields.items():
-    #         with self.subTest(value=value):
-    #             form_field = response.context.get('form').fields.get(value)
-    #             self.assertIsInstance(form_field, expected)
+    def test_context_post_create(self):
+        response = self.authorized_client.get(reverse('posts:post_create'))
+        form_fields = {
+            'group': forms.models.ModelChoiceField,
+            'text': forms.fields.CharField,
+        }
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                form_field = response.context.get('form').fields.get(value)
+                self.assertIsInstance(form_field, expected)
 
-    # def test_context_post_edit(self):
-    #     response = self.authorized_client.get(
-    #         reverse('posts:post_edit', kwargs={'post_id':
-    #                 f'{self.post.id}'}))
-    #     form_fields = {
-    #         'group': forms.models.ModelChoiceField,
-    #         'text': forms.fields.CharField,
-    #     }
-    #     for value, expected in form_fields.items():
-    #         with self.subTest(value=value):
-    #             form_field = response.context.get('form').fields.get(value)
-    #             self.assertIsInstance(form_field, expected)
+    def test_context_post_edit(self):
+        response = self.authorized_client.get(
+            reverse('posts:post_edit', kwargs={'post_id':
+                    f'{self.post.id}'}))
+        form_fields = {
+            'group': forms.models.ModelChoiceField,
+            'text': forms.fields.CharField,
+        }
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                form_field = response.context.get('form').fields.get(value)
+                self.assertIsInstance(form_field, expected)
 
-    # def test_post_in_url(self):
-    #     response = self.authorized_client.get(reverse('posts:index'))
-    #     self.assertEqual(self.post, response.context['page_obj'][0])
+    def test_post_in_url(self):
+        response = self.authorized_client.get(reverse('posts:index'))
+        self.assertEqual(self.post, response.context['page_obj'][0])
 
-    # def test_post_not_in_group2(self):
-    #     response = self.authorized_client.get(
-    #         reverse('posts:group_list', kwargs={'slug': 'test_group_29'}))
-    #     self.assertNotIn(self.post, response.context.get('page_obj'))
+    def test_post_not_in_group2(self):
+        response = self.authorized_client.get(
+            reverse('posts:group_list', kwargs={'slug': 'test_group'}))
+        self.assertNotIn(self.post, response.context.get('page_obj'))
+
+
+    # class PostPAGINATORTests(TestCase):
+    # @classmethod
+    # def setUpClass(cls):
+    #     super().setUpClass()
+
+    #     cls.user = User.objects.create_user(username='auth')
+    #     cls.not_author = User.objects.create_user(username='not_author')
+
+    #     cls.slug = 'test_group'
+    #     cls.group = Group.objects.create(
+    #         title='Тестовая группа',
+    #         slug='test_group',
+    #         description='Тестовое описание')
+
+    #     cls.slug = 'test_group_29'
+    #     cls.group = Group.objects.create(
+    #         title='Тестовая группа',
+    #         slug='test_group_29',
+    #         description='Тестовое описание')
+
+    #     post = (Post(author=cls.user, text='Тестовая запись %s' % i, group=cls.group) for i in range(POSTS_NUMBER))
+    #     Post.objects.bulk_create(post)
