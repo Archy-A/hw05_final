@@ -23,12 +23,10 @@ class PostModelTest(TestCase):
 
     def test_models_str_post(self):
         """Проверяем, что у моделей корректно работает __str__."""
-        post = PostModelTest.post
-        expected = post.text[:15]
-        self.assertEqual(str(post), expected)
+        expected = self.post.text[:15]
+        self.assertEqual(str(self.post), expected)
 
     def test_models_str_group(self):
         """Проверяем, что у моделей корректно работает __str__."""
-        group = PostModelTest.group
-        expected = group.title
-        self.assertEqual(str(group), expected)
+        expected = self.group.title
+        self.assertEqual(str(self.group), expected)
