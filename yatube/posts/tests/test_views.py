@@ -36,10 +36,8 @@ class PostVIEWTests(TestCase):
 
     def setUp(self) -> None:
         self.guest_client = Client()
-        self.user = self.user
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        self.not_author = self.not_author
         self.authorized_client_not_author = Client()
         self.authorized_client_not_author.force_login(self.not_author)
 
@@ -75,13 +73,9 @@ class PostVIEWTests(TestCase):
             post.group.slug: f'{self.group.slug}'
         }
         for value, expected in context_fields.items():
-            with self.subTest(value=value):
-                self.assertEqual(value, expected)
-
-    def test_context_index(self):
-        response = self.authorized_client.get(reverse('posts:index'))
-        self.assertEqual(len(response.context.get('page_obj').object_list), 1)
-        self.assertTrue(len(response.context.get('page_obj').object_list) > 0)
+            self.assertEqual(value, expected)
+   
+    def context_function(self, response):
         post = response.context['page_obj'][0]
         context_fields = {
             'id': post.id,
@@ -89,10 +83,14 @@ class PostVIEWTests(TestCase):
             'pub_date': post.pub_date,
             'author': post.author,
         }
-        for value, expected in context_fields.items():
-            with self.subTest(value=value):
-                self.assertIsNotNone(expected)
-
+        for value in context_fields.values():
+            return self.assertIsNotNone(value)
+        
+    def test_context_index(self):
+        response = self.authorized_client.get(reverse('posts:index'))
+        self.assertEqual(len(response.context.get('page_obj').object_list), 1)
+        self.assertTrue(len(response.context.get('page_obj').object_list) > 0)
+        self.context_function(response)
         cont = response.context
         context_fields = {
             cont['page_obj'][0].text: 'Тестовая запись',
@@ -104,17 +102,7 @@ class PostVIEWTests(TestCase):
     def test_context_grouplist(self):
         response = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': 'test_group_29'}))
-        groupcontext = response.context['page_obj'][0]
-        context_fields = {
-            'id': groupcontext.id,
-            'text': groupcontext.text,
-            'pub_date': groupcontext.pub_date,
-            'author': groupcontext.author,
-        }
-        for value, expected in context_fields.items():
-            with self.subTest(value=value):
-                self.assertIsNotNone(expected)
-
+        self.context_function(response)
         cont = response.context
         context_fields = {
             cont['group'].title: 'Тестовая группа',
@@ -127,17 +115,7 @@ class PostVIEWTests(TestCase):
     def test_context_profile(self):
         response = self.authorized_client.get(
             reverse('posts:profile', kwargs={'username': 'auth'}))
-        profilecontext = response.context['page_obj'][0]
-        context_fields = {
-            'id': profilecontext.id,
-            'text': profilecontext.text,
-            'pub_date': profilecontext.pub_date,
-            'author': profilecontext.author,
-        }
-        for value, expected in context_fields.items():
-            with self.subTest(value=value):
-                self.assertIsNotNone(expected)
-
+        self.context_function(response)
         cont = response.context
         context_fields = {
             cont['user'].username: 'auth',
@@ -199,7 +177,8 @@ class PaginatorVIEWTest(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-        self.post = (Post(author=self.user, text='Тест %s' % i , group=self.group) for i in range(POSTS_NUMBER))
+        self.post = (Post(author=self.user, text='Тест %s' % i ,
+                          group=self.group) for i in range(POSTS_NUMBER))
         Post.objects.bulk_create(self.post)
 
     def test_index_page_contains_ten_records(self):
@@ -207,21 +186,25 @@ class PaginatorVIEWTest(TestCase):
         self.assertEqual(len(response.context['page_obj']), 10)
 
     def test_grouplist_page_contains_ten_records(self):
-        response = self.client.get(reverse('posts:group_list', kwargs={'slug': 'test_group'}))
+        response = self.client.get(reverse('posts:group_list',
+                                           kwargs={'slug': 'test_group'}))
         self.assertEqual(len(response.context['page_obj']), 10)
 
     def test_profile_page_contains_ten_records(self):
-        response = self.client.get(reverse('posts:profile', kwargs={'username': f'{self.user}'}))
+        response = self.client.get(reverse('posts:profile',
+                                           kwargs={'username': f'{self.user}'}))
         self.assertEqual(len(response.context['page_obj']), 10)
 
     def test_second_page_contains_one_records(self):
         response = self.client.get(reverse('posts:index') + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 1) 
+        self.assertEqual(len(response.context['page_obj']), 1)
 
     def test_second_page_contains_one_records(self):
-        response = self.client.get(reverse('posts:group_list', kwargs={'slug': 'test_group'}) + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 1) 
+        response = self.client.get(reverse('posts:group_list',
+                                           kwargs={'slug': 'test_group'}) + '?page=2')
+        self.assertEqual(len(response.context['page_obj']), 1)
 
     def test_second_page_contains_one_records(self):
-        response = self.client.get(reverse('posts:profile', kwargs={'username': f'{self.user}'}) + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 1) 
+        response = self.client.get(reverse('posts:profile',
+                                           kwargs={'username': f'{self.user}'}) + '?page=2')
+        self.assertEqual(len(response.context['page_obj']), 1)

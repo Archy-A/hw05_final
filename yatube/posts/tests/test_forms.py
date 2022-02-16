@@ -47,6 +47,10 @@ class PostFormTests(TestCase):
         self.assertEqual(post[0].author, self.user)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertRedirects(response, prof)
+        response = self.authorized_client.get(reverse('posts:post_create'))
+        get_form = response.context.get('form')
+        self.assertIsInstance(get_form, PostForm)
+        self.assertFalse(response.context['is_edit'])
 
     def test_post_edit(self):
         self.post = Post.objects.create(
@@ -59,21 +63,13 @@ class PostFormTests(TestCase):
             'group': self.group2.id,
         }
         response = self.authorized_client.post(
-            reverse('posts:post_edit', kwargs={
-                    'post_id': f'{self.post.id}'}),
+            reverse('posts:post_edit',
+                    kwargs={'post_id': f'{self.post.id}'}),
             data=form_data,
             follow=True
         )
 
         self.post.refresh_from_db()
-        # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-        # print( ' query    = ', post.values() )
-        # print( ' author   = ', post[0].author )
-        # print( ' text     = ', post[0].text )
-        # print( ' text     = ', self.post.text )
-        # print( ' group    = ', post[0].group )
-        # print( ' pub date = ', post[0].pub_date )
-        # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
         self.assertEqual(Post.objects.count(), 1)
         self.assertEqual(self.post.text, form_data['text'])
         self.assertEqual(self.post.group, self.group2)
@@ -81,3 +77,9 @@ class PostFormTests(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         prof = reverse('posts:post_detail', kwargs={'post_id': self.post.id})
         self.assertRedirects(response, prof)
+        response = self.authorized_client.post(
+            reverse('posts:post_edit',
+                     kwargs={'post_id': f'{self.post.id}'}))
+        get_form = response.context.get('form')
+        self.assertIsInstance(get_form, PostForm)
+        self.assertTrue(response.context['is_edit'])
