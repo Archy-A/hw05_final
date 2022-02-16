@@ -6,6 +6,8 @@ from posts.models import Group, Post, User
 from http import HTTPStatus
 
 
+POSTS_NUMBER = 30
+
 class PostFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -31,14 +33,12 @@ class PostFormTests(TestCase):
         form_data = {
             'text': 'Сообщение 1',
             'group': self.group.id,
-
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'),
             data=form_data,
             follow=True
         )
-
         prof = reverse('posts:profile', kwargs={'username': 'Author_Leo'})
         post = Post.objects.all().filter(id=1)
         self.assertEqual(Post.objects.count(), 1)
@@ -49,13 +49,11 @@ class PostFormTests(TestCase):
         self.assertRedirects(response, prof)
 
     def test_post_edit(self):
-
         self.post = Post.objects.create(
             author=self.user,
             text='Сообщение 3',
             group=self.group,
         )
-
         form_data = {
             'text': 'Сообщение 4',
             'group': self.group2.id,
@@ -67,23 +65,19 @@ class PostFormTests(TestCase):
             follow=True
         )
 
-        # post = Post.objects.all().filter(id=1)
         self.post.refresh_from_db()
-        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
         # print( ' query    = ', post.values() )
         # print( ' author   = ', post[0].author )
         # print( ' text     = ', post[0].text )
-        print( ' text     = ', self.post.text )
+        # print( ' text     = ', self.post.text )
         # print( ' group    = ', post[0].group )
         # print( ' pub date = ', post[0].pub_date )
-        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
         self.assertEqual(Post.objects.count(), 1)
         self.assertEqual(self.post.text, form_data['text'])
         self.assertEqual(self.post.group, self.group2)
         self.assertEqual(self.post.author, self.user)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        # 
         prof = reverse('posts:post_detail', kwargs={'post_id': self.post.id})
         self.assertRedirects(response, prof)
-
-

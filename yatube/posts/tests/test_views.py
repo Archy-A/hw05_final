@@ -6,14 +6,13 @@ from django.urls import reverse
 from ..models import Group, Post
 
 User = get_user_model()
-POSTS_NUMBER = 30
+POSTS_NUMBER = 11
 
 
 class PostVIEWTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
         cls.user = User.objects.create_user(username='auth')
         cls.not_author = User.objects.create_user(username='not_author')
 
@@ -183,25 +182,46 @@ class PostVIEWTests(TestCase):
         self.assertNotIn(self.post, response.context.get('page_obj'))
 
 
-    # class PostPAGINATORTests(TestCase):
-    # @classmethod
-    # def setUpClass(cls):
-    #     super().setUpClass()
+class PaginatorVIEWTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='user')
+        cls.slug = 'test_group'
+        cls.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='test_group',
+            description='Тестовое описание')
 
-    #     cls.user = User.objects.create_user(username='auth')
-    #     cls.not_author = User.objects.create_user(username='not_author')
+    def setUp(self) -> None:
+        self.guest_client = Client()
+        self.user = self.user
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
 
-    #     cls.slug = 'test_group'
-    #     cls.group = Group.objects.create(
-    #         title='Тестовая группа',
-    #         slug='test_group',
-    #         description='Тестовое описание')
+        self.post = (Post(author=self.user, text='Тест %s' % i , group=self.group) for i in range(POSTS_NUMBER))
+        Post.objects.bulk_create(self.post)
 
-    #     cls.slug = 'test_group_29'
-    #     cls.group = Group.objects.create(
-    #         title='Тестовая группа',
-    #         slug='test_group_29',
-    #         description='Тестовое описание')
+    def test_index_page_contains_ten_records(self):
+        response = self.client.get(reverse('posts:index'))
+        self.assertEqual(len(response.context['page_obj']), 10)
 
-    #     post = (Post(author=cls.user, text='Тестовая запись %s' % i, group=cls.group) for i in range(POSTS_NUMBER))
-    #     Post.objects.bulk_create(post)
+    def test_grouplist_page_contains_ten_records(self):
+        response = self.client.get(reverse('posts:group_list', kwargs={'slug': 'test_group'}))
+        self.assertEqual(len(response.context['page_obj']), 10)
+
+    def test_profile_page_contains_ten_records(self):
+        response = self.client.get(reverse('posts:profile', kwargs={'username': f'{self.user}'}))
+        self.assertEqual(len(response.context['page_obj']), 10)
+
+    def test_second_page_contains_one_records(self):
+        response = self.client.get(reverse('posts:index') + '?page=2')
+        self.assertEqual(len(response.context['page_obj']), 1) 
+
+    def test_second_page_contains_one_records(self):
+        response = self.client.get(reverse('posts:group_list', kwargs={'slug': 'test_group'}) + '?page=2')
+        self.assertEqual(len(response.context['page_obj']), 1) 
+
+    def test_second_page_contains_one_records(self):
+        response = self.client.get(reverse('posts:profile', kwargs={'username': f'{self.user}'}) + '?page=2')
+        self.assertEqual(len(response.context['page_obj']), 1) 
