@@ -4,6 +4,7 @@ from django.test import Client, TestCase
 
 User = get_user_model()
 
+
 class PostURLTests(TestCase):
     @classmethod
     def setUpClass(cls):

@@ -1,4 +1,3 @@
-from django import forms
 from django.test import Client, TestCase
 from django.urls import reverse
 from posts.forms import PostForm
@@ -7,6 +6,7 @@ from http import HTTPStatus
 
 
 POSTS_NUMBER = 30
+
 
 class PostFormTests(TestCase):
     @classmethod
@@ -79,7 +79,7 @@ class PostFormTests(TestCase):
         self.assertRedirects(response, prof)
         response = self.authorized_client.post(
             reverse('posts:post_edit',
-                     kwargs={'post_id': f'{self.post.id}'}))
+                    kwargs={'post_id': f'{self.post.id}'}))
         get_form = response.context.get('form')
         self.assertIsInstance(get_form, PostForm)
         self.assertTrue(response.context['is_edit'])

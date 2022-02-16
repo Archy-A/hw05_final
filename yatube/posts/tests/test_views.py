@@ -31,8 +31,7 @@ class PostVIEWTests(TestCase):
         cls.post = Post.objects.create(
             author=cls.user,
             text='Тестовая запись',
-            group=cls.group,
-            )
+            group=cls.group)
 
     def setUp(self) -> None:
         self.guest_client = Client()
@@ -74,7 +73,7 @@ class PostVIEWTests(TestCase):
         }
         for value, expected in context_fields.items():
             self.assertEqual(value, expected)
-   
+
     def context_function(self, response):
         post = response.context['page_obj'][0]
         context_fields = {
@@ -85,7 +84,7 @@ class PostVIEWTests(TestCase):
         }
         for value in context_fields.values():
             return self.assertIsNotNone(value)
-        
+   
     def test_context_index(self):
         response = self.authorized_client.get(reverse('posts:index'))
         self.assertEqual(len(response.context.get('page_obj').object_list), 1)
@@ -177,7 +176,7 @@ class PaginatorVIEWTest(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-        self.post = (Post(author=self.user, text='Тест %s' % i ,
+        self.post = (Post(author=self.user, text='Тест %s' % i,
                           group=self.group) for i in range(POSTS_NUMBER))
         Post.objects.bulk_create(self.post)
 
@@ -192,7 +191,7 @@ class PaginatorVIEWTest(TestCase):
 
     def test_profile_page_contains_ten_records(self):
         response = self.client.get(reverse('posts:profile',
-                                           kwargs={'username': f'{self.user}'}))
+                                   kwargs={'username': f'{self.user}'}))
         self.assertEqual(len(response.context['page_obj']), 10)
 
     def test_second_page_contains_one_records(self):
@@ -201,10 +200,10 @@ class PaginatorVIEWTest(TestCase):
 
     def test_second_page_contains_one_records(self):
         response = self.client.get(reverse('posts:group_list',
-                                           kwargs={'slug': 'test_group'}) + '?page=2')
+                                   kwargs={'slug': 'test_group'}) + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 1)
 
     def test_second_page_contains_one_records(self):
         response = self.client.get(reverse('posts:profile',
-                                           kwargs={'username': f'{self.user}'}) + '?page=2')
+                                   kwargs={'username': f'{self.user}'}) + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 1)
