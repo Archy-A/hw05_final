@@ -84,7 +84,7 @@ class PostVIEWTests(TestCase):
         }
         for value in context_fields.values():
             return self.assertIsNotNone(value)
-   
+
     def test_context_index(self):
         response = self.authorized_client.get(reverse('posts:index'))
         self.assertEqual(len(response.context.get('page_obj').object_list), 1)
@@ -205,5 +205,6 @@ class PaginatorVIEWTest(TestCase):
 
     def test_second_page_contains_one_records(self):
         response = self.client.get(reverse('posts:profile',
-                                   kwargs={'username': f'{self.user}'}) + '?page=2')
+                                   kwargs={'username': f'{self.user}'}) +
+                                           '?page=2')
         self.assertEqual(len(response.context['page_obj']), 1)
