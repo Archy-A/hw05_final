@@ -205,6 +205,6 @@ class PaginatorVIEWTest(TestCase):
 
     def test_second_page_contains_one_records(self):
         response = self.client.get(reverse('posts:profile',
-                                   kwargs={'username': f'{self.user}'}) +
-                                           '?page=2')
+                                   kwargs={'username': f'{self.user}'})
+                                           + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 1)
