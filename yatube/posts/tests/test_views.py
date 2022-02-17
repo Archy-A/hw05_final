@@ -173,7 +173,8 @@ class PaginatorVIEWTest(TestCase):
         cls.user = User.objects.create_user(username="user")
         cls.slug = "test_group"
         cls.group = Group.objects.create(
-            title="Тестовая группа", slug="test_group", description="Тестовое описание"
+            title="Тестовая группа", slug="test_group",
+            description="Тестовое описание"
         )
 
     def setUp(self) -> None:
@@ -192,7 +193,8 @@ class PaginatorVIEWTest(TestCase):
         context_fields = {
             self.client.get(reverse("posts:index")): TEN_RECORDS,
             self.client.get(
-                reverse("posts:group_list", kwargs={"slug": f"{self.slug}"})): TEN_RECORDS,
+                reverse("posts:group_list", kwargs={"slug": f"{self.slug}"})
+            ): TEN_RECORDS,
             self.client.get(
                 reverse("posts:profile", kwargs={"username": f"{self.user}"})
             ): TEN_RECORDS,
