@@ -1,1 +1,0 @@
-PAGEVIEW = 10

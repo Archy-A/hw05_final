@@ -96,3 +96,11 @@ LOGIN_REDIRECT_URL = 'posts:index'
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+PAGEVIEW = 10
+
+POSTS_NUMBER = 11
+
+ONE_RECORD = 1
+
+TEN_RECORDS = 10

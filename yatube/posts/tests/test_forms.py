@@ -1,11 +1,7 @@
 from django.test import Client, TestCase
 from django.urls import reverse
-from posts.forms import PostForm
 from posts.models import Group, Post, User
 from http import HTTPStatus
-
-
-POSTS_NUMBER = 30
 
 
 class PostFormTests(TestCase):
@@ -39,18 +35,13 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        prof = reverse('posts:profile', kwargs={'username': 'Author_Leo'})
-        post = Post.objects.all().filter(id=1)
-        self.assertEqual(Post.objects.count(), 1)
-        self.assertEqual(post[0].text, form_data['text'])
-        self.assertEqual(post[0].group, self.group)
-        self.assertEqual(post[0].author, self.user)
+        prof = reverse('posts:profile', args=[self.user.username])
+        post = Post.objects.get(id=1)
+        self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(post.group, self.group)
+        self.assertEqual(post.author, self.user)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertRedirects(response, prof)
-        response = self.authorized_client.get(reverse('posts:post_create'))
-        get_form = response.context.get('form')
-        self.assertIsInstance(get_form, PostForm)
-        self.assertFalse(response.context['is_edit'])
 
     def test_post_edit(self):
         self.post = Post.objects.create(
@@ -80,6 +71,3 @@ class PostFormTests(TestCase):
         response = self.authorized_client.post(
             reverse('posts:post_edit',
                     kwargs={'post_id': f'{self.post.id}'}))
-        get_form = response.context.get('form')
-        self.assertIsInstance(get_form, PostForm)
-        self.assertTrue(response.context['is_edit'])
