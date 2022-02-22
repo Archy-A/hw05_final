@@ -1,4 +1,5 @@
 import os
+from pickle import FALSE
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -6,7 +7,7 @@ SECRET_KEY = 'sgk)1fmp+df(z=nstu*!=v1*036m%efd6h^ltpxbyym%lz&3sw'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver', ]
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '[::1]', 'testserver']
 
 INSTALLED_APPS = [
     'posts.apps.PostsConfig',
@@ -19,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'sorl.thumbnail',
 ]
 
 MIDDLEWARE = [
@@ -104,3 +106,9 @@ POSTS_NUMBER = 11
 ONE_RECORD = 1
 
 TEN_RECORDS = 10
+
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
