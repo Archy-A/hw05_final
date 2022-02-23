@@ -2,8 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import PostForm
-from .models import Group, Post, User
+from .forms import PostForm, CommentForm
+from .models import Group, Post, User, Comment
 from yatube.settings import PAGEVIEW
 
 
@@ -75,8 +75,41 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    form = CommentForm(request.POST or None)
     template_name = 'posts/post_detail.html'
+    comments = post.comments.all()
     context = {
-        'post': post
+        'post': post,
+        'comments': comments,
+        'form': form,
     }
     return render(request, template_name, context)
+
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    # user = post.author
+    comments = post.comments.all()
+    form = CommentForm(request.POST or None)
+    # posts = user.author_posts.all()
+    is_edit = request.user == post.author
+    # count_posts = posts.count()
+    context = {
+        # 'count_posts': count_posts,
+        'post': post,
+        'is_edit': is_edit,
+        'comments': comments,
+        'form': form,
+    }
+    return render(request, 'posts/post_detail.html', context)
+
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    form = CommentForm(request.POST or None)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.author = request.user
+        comment.post = post
+        comment.save()
+        return redirect('posts:post_detail', post_id=post_id)
+    return redirect('posts:post_detail', post_id=post_id)

@@ -13,7 +13,6 @@ class Group(models.Model):
     def __str__(self):
         return self.title
 
-
 class Post(models.Model):
     text = models.TextField(verbose_name='Текст',)
     pub_date = models.DateTimeField(auto_now_add=True)
@@ -22,7 +21,8 @@ class Post(models.Model):
         verbose_name='Автор',
         null=True,
         on_delete=models.CASCADE,
-        related_name='posts'
+        related_name='posts',
+        # default='1'
     )
     group = models.ForeignKey(
         Group,
@@ -43,3 +43,34 @@ class Post(models.Model):
 
     def __str__(self):
         return self.text[:15]
+
+
+class Comment(models.Model):
+    text = models.TextField(
+        verbose_name='Текст комментария',
+        help_text='Введите текст комментария',
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации комментария',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор',
+        # default='1'
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Пост',
+        # default=' '
+    )
+
+    class Meta:
+        ordering = ('-created',)
+
+    def __str__(self):
+        return self.text
