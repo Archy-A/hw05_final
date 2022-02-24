@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+<!-- component_name {{host}} {{timestamp}} -->
 {% load thumbnail %}
 {% block titleup %} Это главная страница проекта Yatube {% endblock %}
 
@@ -9,6 +10,10 @@
 
 {% block content %}
 <article>
+
+  {% comment %} {% load cache %}
+  {% cache 20 index_page %} {% endcomment %}
+
   {% for post in page_obj  %}
     <ul>
       <li>
@@ -37,9 +42,12 @@
   <img class="card-img my-2" src="{{ im.url }}">
   {% endthumbnail %}
   <p>{{ post.text|linebreaksbr }}</p>
-
   {% if not forloop.last %}<hr>{% endif %}
   {% endfor %} 
+
+  {% comment %} {% endcache %}    {% endcomment %}
+
 </article>  
+
 {% include 'posts/includes/paginator.html' %}
 {% endblock %}  

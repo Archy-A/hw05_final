@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import PostForm, CommentForm
 from .models import Group, Post, User, Comment
 from yatube.settings import PAGEVIEW
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
 
 def _paginator(request, posts):
@@ -39,13 +41,28 @@ def post_edit(request, post_id):
                   {'form': form, 'is_edit': True, 'post_id': post.id})
 
 
+# @cache_page(60 * 15)
+# # @cache_page(20, key_prefix='index_page')
+# def index(request):
+#     allposts = Post.objects.all()
+#     page_obj = _paginator(request, allposts)
+#     context = {
+#         'page_obj': page_obj,
+#     }
+#     return render(request, 'posts/index.html', context)
+
 def index(request):
-    allposts = Post.objects.all()
-    page_obj = _paginator(request, allposts)
+    template = 'posts/index.html'
+    if 'index_page' in cache:
+        post_list = cache.get('index_page')
+    else:
+        post_list = Post.objects.all()
+        cache.set('index_page', post_list, 20)
+    page_obj = _paginator(request, post_list)
     context = {
         'page_obj': page_obj,
     }
-    return render(request, 'posts/index.html', context)
+    return render(request, template, context)
 
 
 def group_posts(request, slug):
@@ -71,19 +88,7 @@ def profile(request, username):
         'page_obj': page_obj,
     }
     return render(request, template_name, context)
-
-
-def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    form = CommentForm(request.POST or None)
-    template_name = 'posts/post_detail.html'
-    comments = post.comments.all()
-    context = {
-        'post': post,
-        'comments': comments,
-        'form': form,
-    }
-    return render(request, template_name, context)
+1
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)

@@ -4,6 +4,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from posts.forms import PostForm
 from ..models import Group, Post
+from django.core.cache import cache
 from yatube.settings import POSTS_NUMBER, ONE_RECORD, TEN_RECORDS
 
 User = get_user_model()
@@ -190,6 +191,7 @@ class PaginatorVIEWTest(TestCase):
         Post.objects.bulk_create(self.post)
 
     def test_pages_contain_ten_records(self):
+        cache.clear()
         context_fields = {
             self.client.get(reverse("posts:index")): TEN_RECORDS,
             self.client.get(
@@ -201,6 +203,7 @@ class PaginatorVIEWTest(TestCase):
         }
         for value, expected in context_fields.items():
             with self.subTest(value=value):
+                cache.clear()
                 self.assertEqual(len(value.context["page_obj"]), expected)
 
     def test_pages_contain_one_record(self):
