@@ -68,28 +68,36 @@ def group_posts(request, slug):
 
 def profile(request, username):
     template_name = 'posts/profile.html'
-    user = get_object_or_404(User, username=username)
-    allposts = Post.objects.filter(author=user)
+    author = get_object_or_404(User, username=username)
+    me = request.user
+    allposts = Post.objects.filter(author=author)
     page_obj = _paginator(request, allposts)
     post_count = allposts.count()
+
+    if request.user.is_authenticated:
+        following = Follow.objects.filter(author=author, user=me).exists()
+    else:
+        following = False
+
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print(f'follow={author}, me={me}, bollean={following}')
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+
     context = {
-        'author': user,
+        'author': author,
         'post_count': post_count,
         'page_obj': page_obj,
+        'following': following,
     }
     return render(request, template_name, context)
 
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    # user = post.author
     comments = post.comments.all()
     form = CommentForm(request.POST or None)
-    # posts = user.author_posts.all()
     is_edit = request.user == post.author
-    # count_posts = posts.count()
     context = {
-        # 'count_posts': count_posts,
         'post': post,
         'is_edit': is_edit,
         'comments': comments,
@@ -112,13 +120,12 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    # user = get_object_or_404(User, request.user)
     user = request.user
     authors = Follow.objects.filter(user=user)
     alla=[i.author for i in authors]
-    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-    print(alla)
-    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    # print(alla)
+    # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
     allposts = Post.objects.filter(author__in=alla)
    
     page_obj = _paginator(request, allposts)
@@ -133,13 +140,6 @@ def follow_index(request):
 def profile_follow(request, username):
     user=request.user
     author = get_object_or_404(User, username=username)
-    if request.user.is_authenticated:
-        following = Follow.objects.filter(user=user, author=author).exists()
-    else:
-        following = False
-    context = {
-        'following': following,
-    }
     Follow.objects.create(user=user, author=author)
     return redirect('posts:follow_index')
 
