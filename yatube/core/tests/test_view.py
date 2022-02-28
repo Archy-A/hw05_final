@@ -67,3 +67,7 @@ class TaskCreateFormTests(TestCase):
         for value, expected in context_fields.items():
             with self.subTest(value=value):
                 self.assertEqual(value, expected)
+
+    def test_uses_404_custom_template(self):
+        response = self.authorized_client.get(reverse('posts:post_detail', kwargs={'post_id': 0}))
+        self.assertTemplateUsed(response, "core/404.html")

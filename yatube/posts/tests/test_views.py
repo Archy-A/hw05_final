@@ -33,7 +33,7 @@ class PostVIEWTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.authorized_client_not_author = Client()
-        self.authorized_client_not_author.force_login(self.not_author)
+        self.authorized_client_not_author.force_login(self.not_author)      
 
     def test_uses_correct_template(self):
         post = Post.objects.get(id=1)
