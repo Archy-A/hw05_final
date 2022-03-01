@@ -3,7 +3,6 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from ..models import Group
 from django.core.cache import cache
-from yatube.settings import POSTS_NUMBER, ONE_RECORD, TEN_RECORDS
 
 User = get_user_model()
 
