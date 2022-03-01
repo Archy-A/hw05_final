@@ -73,16 +73,10 @@ def profile(request, username):
     allposts = Post.objects.filter(author=author)
     page_obj = _paginator(request, allposts)
     post_count = allposts.count()
-
     if request.user.is_authenticated:
         following = Follow.objects.filter(author=author, user=me).exists()
     else:
         following = False
-
-    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-    print(f'follow={author}, me={me}, bollean={following}')
-    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-
     context = {
         'author': author,
         'post_count': post_count,
@@ -123,9 +117,6 @@ def follow_index(request):
     user = request.user
     authors = Follow.objects.filter(user=user)
     alla=[i.author for i in authors]
-    # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-    # print(alla)
-    # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
     allposts = Post.objects.filter(author__in=alla)
    
     page_obj = _paginator(request, allposts)
@@ -133,15 +124,16 @@ def follow_index(request):
         'author': user,
         'page_obj': page_obj,
     }
-#    Follow.objects.all().delete()
     return render(request, 'posts/follow.html', context)
 
-@login_required
 def profile_follow(request, username):
-    user=request.user
-    author = get_object_or_404(User, username=username)
-    Follow.objects.create(user=user, author=author)
-    return redirect('posts:follow_index')
+    auth = get_object_or_404(User, username=username)
+    user = request.user
+    if user == auth or Follow.objects.filter(user=user, author=auth).exists():
+        return redirect('posts:index')
+    else:
+        Follow.objects.create(user=user, author=auth)
+        return redirect('posts:follow_index')
 
 @login_required
 def profile_unfollow(request, username):

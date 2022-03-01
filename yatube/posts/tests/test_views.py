@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from posts.forms import PostForm
-from ..models import Group, Post
+from ..models import Group, Post, Follow
 from django.core.cache import cache
 from yatube.settings import POSTS_NUMBER, ONE_RECORD, TEN_RECORDS
 
@@ -165,6 +165,29 @@ class PostVIEWTests(TestCase):
             reverse("posts:group_list", kwargs={"slug": "test_group_33"})
         )
         self.assertNotIn(self.post, response.context.get("page_obj"))
+
+    def test_follow_unfollow(self):
+        user = User.objects.create_user(username="archy")
+        authorized_client_archy = Client()
+        authorized_client_archy.force_login(user)
+        response = authorized_client_archy.get(
+             reverse("posts:profile_follow", kwargs={"username": "auth"}))
+        table_follow = str(Follow.objects.get(user=user))
+        self.post.refresh_from_db()
+        author = self.post.author
+        table_post = f'{user} / {author}'
+        self.assertEqual(table_follow, table_post)
+        response = authorized_client_archy.get(
+             reverse("posts:follow_index"))
+        follow_context = response.context['page_obj'][0].text
+        origin_context = self.post.text
+        self.assertEqual(follow_context, origin_context)
+        response = authorized_client_archy.get(
+             reverse("posts:profile_unfollow", kwargs={"username": "auth"}))
+        table_follow = Follow.objects
+        self.assertFalse(table_follow.exists())
+        follow_context = response.context
+        self.assertIsNone(follow_context)
 
 
 class PaginatorVIEWTest(TestCase):
