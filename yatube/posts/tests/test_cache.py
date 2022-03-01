@@ -13,7 +13,6 @@ class PostVIEWTests(TestCase):
         super().setUpClass()
         cls.user = User.objects.create_user(username="auth")
         cls.not_author = User.objects.create_user(username="not_author")
-
         cls.slug = "test_group_29"
         cls.group = Group.objects.create(
             title="Тестовая группа",
