@@ -14,32 +14,31 @@ class Group(models.Model):
     def __str__(self):
         return self.title
 
+
 class Post(CreatedModel):
-    text = models.TextField(verbose_name='Текст',)
+    text = models.TextField(
+        verbose_name="Текст",
+    )
     # pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(
         User,
-        verbose_name='Автор',
+        verbose_name="Автор",
         null=True,
         on_delete=models.CASCADE,
-        related_name='posts',
+        related_name="posts",
     )
     group = models.ForeignKey(
         Group,
-        verbose_name='Группа',
+        verbose_name="Группа",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name='posts'
+        related_name="posts",
     )
-    image = models.ImageField(
-        'Картинка',
-        upload_to='posts/',
-        blank=True
-    )  
+    image = models.ImageField("Картинка", upload_to="posts/", blank=True)
 
     class Meta:
-        ordering = ('-pub_date',)
+        ordering = ("-pub_date",)
 
     def __str__(self):
         return self.text[:15]
@@ -47,28 +46,28 @@ class Post(CreatedModel):
 
 class Comment(models.Model):
     text = models.TextField(
-        verbose_name='Текст комментария',
-        help_text='Введите текст комментария',
+        verbose_name="Текст комментария",
+        help_text="Введите текст комментария",
     )
     created = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Дата публикации комментария',
+        verbose_name="Дата публикации комментария",
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор',
+        related_name="comments",
+        verbose_name="Автор",
     )
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Пост',
+        related_name="comments",
+        verbose_name="Пост",
     )
 
     class Meta:
-        ordering = ('-created',)
+        ordering = ("-created",)
 
     def __str__(self):
         return self.text
@@ -78,22 +77,22 @@ class Follow(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follower',
-        verbose_name='Пользователь',
+        related_name="follower",
+        verbose_name="Пользователь",
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='following',
-        verbose_name='Автор',
+        related_name="following",
+        verbose_name="Автор",
     )
     created = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Дата публикации ',
+        verbose_name="Дата публикации ",
     )
 
     class Meta:
-        ordering = ('-created',)
+        ordering = ("-created",)
 
     def __str__(self):
-        return f'{self.user.username} / {self.author.username}'
+        return f"{self.user.username} / {self.author.username}"

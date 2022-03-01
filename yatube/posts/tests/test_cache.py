@@ -27,45 +27,41 @@ class PostVIEWTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.authorized_client_not_author = Client()
-        self.authorized_client_not_author.force_login(self.not_author)  
+        self.authorized_client_not_author.force_login(self.not_author)
 
     def test_index_first_page_cache_contains_records(self):
         """Тест на кэш контекст"""
-        response_one = self.guest_client.get(reverse('posts:index'))
-        response_one_obj_con = response_one.context['page_obj'][0].id
+        response_one = self.guest_client.get(reverse("posts:index"))
+        response_one_obj_con = response_one.context["page_obj"][0].id
         form_data = {
-            'text': 'Тестовый пост',
+            "text": "Тестовый пост",
         }
         self.authorized_client.post(
-            reverse('posts:post_create'),
-            data=form_data,
-            follow=True
+            reverse("posts:post_create"), data=form_data, follow=True
         )
-        response_two = self.guest_client.get(reverse('posts:index'))
-        response_two_obj_con = response_two.context['page_obj'][0].id
+        response_two = self.guest_client.get(reverse("posts:index"))
+        response_two_obj_con = response_two.context["page_obj"][0].id
         self.assertEqual(response_one_obj_con, response_two_obj_con)
         cache.clear()
-        response_three = self.guest_client.get(reverse('posts:index'))
-        response_three_obj_con = response_three.context['page_obj'][0].id
+        response_three = self.guest_client.get(reverse("posts:index"))
+        response_three_obj_con = response_three.context["page_obj"][0].id
         self.assertNotEqual(response_two_obj_con, response_three_obj_con)
         cache.clear()
 
     def test_index_first_page_cache_contains_records(self):
         """Тест на кэш контент"""
-        response_one = self.guest_client.get(reverse('posts:index'))
+        response_one = self.guest_client.get(reverse("posts:index"))
         response_one_obj_con = response_one.content
         form_data = {
-            'text': 'Тестовый пост',
+            "text": "Тестовый пост",
         }
         self.authorized_client.post(
-            reverse('posts:post_create'),
-            data=form_data,
-            follow=True
+            reverse("posts:post_create"), data=form_data, follow=True
         )
-        response_two = self.guest_client.get(reverse('posts:index'))
+        response_two = self.guest_client.get(reverse("posts:index"))
         response_two_obj_con = response_two.content
         self.assertEqual(response_one_obj_con, response_two_obj_con)
         cache.clear()
-        response_three = self.guest_client.get(reverse('posts:index'))
+        response_three = self.guest_client.get(reverse("posts:index"))
         response_three_obj_con = response_three.content
         self.assertNotEqual(response_two_obj_con, response_three_obj_con)

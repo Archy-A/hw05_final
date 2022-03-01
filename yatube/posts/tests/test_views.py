@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from http import HTTPStatus
 from posts.forms import PostForm
 from ..models import Group, Post, Follow
 from django.core.cache import cache
@@ -33,7 +34,7 @@ class PostVIEWTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.authorized_client_not_author = Client()
-        self.authorized_client_not_author.force_login(self.not_author)      
+        self.authorized_client_not_author.force_login(self.not_author)
 
     def test_uses_correct_template(self):
         post = Post.objects.get(id=1)
@@ -171,23 +172,31 @@ class PostVIEWTests(TestCase):
         authorized_client_archy = Client()
         authorized_client_archy.force_login(user)
         response = authorized_client_archy.get(
-             reverse("posts:profile_follow", kwargs={"username": "auth"}))
+            reverse("posts:profile_follow", kwargs={"username": "auth"})
+        )
         table_follow = str(Follow.objects.get(user=user))
         self.post.refresh_from_db()
         author = self.post.author
-        table_post = f'{user} / {author}'
+        table_post = f"{user} / {author}"
         self.assertEqual(table_follow, table_post)
-        response = authorized_client_archy.get(
-             reverse("posts:follow_index"))
-        follow_context = response.context['page_obj'][0].text
+        response = authorized_client_archy.get(reverse("posts:follow_index"))
+        follow_context = response.context["page_obj"][0].text
         origin_context = self.post.text
         self.assertEqual(follow_context, origin_context)
         response = authorized_client_archy.get(
-             reverse("posts:profile_unfollow", kwargs={"username": "auth"}))
+            reverse("posts:profile_unfollow", kwargs={"username": "auth"})
+        )
         table_follow = Follow.objects
         self.assertFalse(table_follow.exists())
         follow_context = response.context
         self.assertIsNone(follow_context)
+        self.guest_client.get(
+            reverse("posts:follow_index"),
+        )
+        self.guest_client.get(
+            reverse("users:login"),
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
 
 class PaginatorVIEWTest(TestCase):
@@ -197,8 +206,7 @@ class PaginatorVIEWTest(TestCase):
         cls.user = User.objects.create_user(username="user")
         cls.slug = "test_group"
         cls.group = Group.objects.create(
-            title="Тестовая группа", slug="test_group",
-            description="Тестовое описание"
+            title="Тестовая группа", slug="test_group", description="Тестовое описание"
         )
 
     def setUp(self) -> None:
@@ -233,8 +241,7 @@ class PaginatorVIEWTest(TestCase):
         context_fields = {
             self.client.get(reverse("posts:index") + "?page=2"): ONE_RECORD,
             self.client.get(
-                reverse("posts:group_list", kwargs={"slug": f"{self.slug}"})
-                + "?page=2"
+                reverse("posts:group_list", kwargs={"slug": f"{self.slug}"}) + "?page=2"
             ): ONE_RECORD,
             self.client.get(
                 reverse("posts:profile", kwargs={"username": f"{self.user}"})
